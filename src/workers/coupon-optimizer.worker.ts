@@ -22,10 +22,6 @@ interface DpNode {
   prev: DpNode | null;
 }
 
-/**
- * DP to find the best subset of products for a single coupon.
- * This optimized version uses a linked-list-like structure to avoid array copying.
- */
 function findBestSubsetForCouponDP(
   availableProducts: (Product & { id: string })[],
   coupon: { amount: number; percent: number },
@@ -34,7 +30,7 @@ function findBestSubsetForCouponDP(
 ) {
   const { amount, percent } = coupon;
   const totalSum = availableProducts.reduce((sum, p) => sum + p.price, 0);
-  
+
   const MAX_ARRAY_SIZE = 1000000;
   if (totalSum > MAX_ARRAY_SIZE) {
     // Fallback to greedy for very large sets where DP is not feasible
@@ -43,7 +39,7 @@ function findBestSubsetForCouponDP(
 
   const dp: (DpNode | null)[] = new Array(totalSum + 1).fill(null);
   // Sentinel node to indicate a sum of 0 is possible with no products
-  dp[0] = { product: { price: 0, count: 0, id: 'start' }, prev: null }; 
+  dp[0] = { product: { price: 0, count: 0, id: 'start' }, prev: null };
 
   const minSteps = 10;
   const dpProgressStep = Math.max(1, Math.floor(availableProducts.length / minSteps));
@@ -65,7 +61,6 @@ function findBestSubsetForCouponDP(
   let bestNode: DpNode | null = null;
 
   if (strategy === 'no-exceed') {
-    // "no-exceed" strategy: Find the largest possible sum less than or equal to the amount.
     for (let j = Math.min(amount, totalSum); j >= 0; j--) {
       if (dp[j] !== null) {
         bestSum = j;
@@ -73,8 +68,19 @@ function findBestSubsetForCouponDP(
         break;
       }
     }
+
+    const largeItems = availableProducts.filter(p => p.price > amount);
+    if (largeItems.length > 0) {
+      const smallestLargeItem = largeItems.sort((a, b) => a.price - b.price)[0];
+      const discountFromDP = Math.floor(bestSum * percent / 100);
+      const discountFromLargeItem = Math.floor(amount * percent / 100);
+
+      if (discountFromLargeItem > discountFromDP) {
+        bestSum = smallestLargeItem.price;
+        bestNode = { product: smallestLargeItem, prev: { product: { price: 0, count: 0, id: 'start' }, prev: null } };
+      }
+    }
   } else {
-    // "default" strategy: Find the smallest sum >= amount, or fall back to largest sum < amount.
     for (let j = amount; j <= totalSum; j++) {
       if (dp[j] !== null) {
         bestSum = j;
@@ -84,7 +90,6 @@ function findBestSubsetForCouponDP(
     }
 
     if (bestSum === 0) {
-      // If no such combination exists, find the largest possible sum below the amount
       for (let j = Math.min(amount - 1, totalSum); j >= 0; j--) {
         if (dp[j] !== null) {
           bestSum = j;
@@ -94,10 +99,10 @@ function findBestSubsetForCouponDP(
       }
     }
   }
-  
+
   const bestSubset: (Product & { id: string })[] = [];
   let currentNode = bestNode;
-  // Reconstruct the subset of products by traversing the linked list
+
   while (currentNode !== null && currentNode.prev !== null) {
     bestSubset.push(currentNode.product);
     currentNode = currentNode.prev;
@@ -108,106 +113,100 @@ function findBestSubsetForCouponDP(
   return { bestSubset, bestDiscount };
 }
 
-/**
- * Greedy algorithm for large datasets.
- */
 function findBestSubsetGreedy(
   availableProducts: (Product & { id: string })[],
   coupon: { amount: number; percent: number },
   progressCb?: (step: number, total: number) => void
 ) {
   const { amount, percent } = coupon;
-  
+
   const sortedProducts = [...availableProducts].sort((a, b) => b.price - a.price);
-  
+
   const bestSubset: (Product & { id: string })[] = [];
   let currentSum = 0;
-  
+
   for (let i = 0; i < sortedProducts.length; i++) {
     const product = sortedProducts[i];
     bestSubset.push(product);
     currentSum += product.price;
-    
+
     if (progressCb && (i % 5 === 0 || i === sortedProducts.length - 1)) {
       progressCb(i + 1, sortedProducts.length);
     }
-    
+
     if (currentSum >= amount) {
       break;
     }
   }
-  
+
   const bestDiscount = Math.floor(Math.min(currentSum, amount) * percent / 100);
-  
+
   return { bestSubset, bestDiscount };
 }
 
-// --- Helper function to run a full optimization strategy ---
 function runOptimization(
-  productPool: (Product & { id: string })[], 
-  couponList: Coupon[], 
+  productPool: (Product & { id: string })[],
+  couponList: Coupon[],
   strategy: 'default' | 'no-exceed',
   progressCb?: (type: string, payload: { value?: number; result?: CouponApplyResult; }) => void
 ): { results: CouponApplyResult[], totalDiscount: number } {
-    let totalDiscount = 0;
-    const results: CouponApplyResult[] = [];
-    const usedProductIds = new Set<string>();
+  let totalDiscount = 0;
+  const results: CouponApplyResult[] = [];
+  const usedProductIds = new Set<string>();
 
-    const totalWork = productPool.length * couponList.length;
-    let currentWork = 0;
+  const totalWork = productPool.length * couponList.length;
+  let currentWork = 0;
 
-    for (let i = 0; i < couponList.length; i++) {
-        const coupon = couponList[i];
-        const availableProducts = productPool.filter(p => !usedProductIds.has(p.id));
+  for (let i = 0; i < couponList.length; i++) {
+    const coupon = couponList[i];
+    const availableProducts = productPool.filter(p => !usedProductIds.has(p.id));
 
-        if (availableProducts.length === 0) break;
-        
-        const { bestSubset, bestDiscount } = findBestSubsetForCouponDP(
-            availableProducts,
-            coupon,
-            strategy,
-            (step, total) => {
-              if (progressCb) {
-                const couponProgress = step / total;
-                const overallProgress = (currentWork + (couponProgress * availableProducts.length)) / (totalWork || 1);
-                progressCb('progress', { value: Math.min(overallProgress, 0.99) });
-              }
-            }
-        );
-        currentWork += availableProducts.length;
+    if (availableProducts.length === 0) break;
 
-        if (bestDiscount > 0) {
-            totalDiscount += bestDiscount;
-            bestSubset.forEach(p => usedProductIds.add(p.id));
-            const newResult: CouponApplyResult = {
-                id: `coupon-${strategy}-${i}-${Date.now()}`,
-                couponAmount: coupon.amount,
-                percent: coupon.percent,
-                applied: bestSubset.map(p => p.price),
-                discount: bestDiscount,
-            };
-            results.push(newResult);
-            if (progressCb) {
-              progressCb('result', { result: newResult });
-            }
-        } else {
-           if (progressCb) {
-             progressCb('progress', { value: Math.min(currentWork / (totalWork || 1), 0.99) });
-           }
+    const { bestSubset, bestDiscount } = findBestSubsetForCouponDP(
+      availableProducts,
+      coupon,
+      strategy,
+      (step, total) => {
+        if (progressCb) {
+          const couponProgress = step / total;
+          const overallProgress = (currentWork + (couponProgress * availableProducts.length)) / (totalWork || 1);
+          progressCb('progress', { value: Math.min(overallProgress, 0.99) });
         }
+      }
+    );
+    currentWork += availableProducts.length;
+
+    if (bestDiscount > 0) {
+      totalDiscount += bestDiscount;
+      bestSubset.forEach(p => usedProductIds.add(p.id));
+      const newResult: CouponApplyResult = {
+        id: `coupon-${strategy}-${i}-${Date.now()}`,
+        couponAmount: coupon.amount,
+        percent: coupon.percent,
+        applied: bestSubset.map(p => p.price),
+        discount: bestDiscount,
+      };
+      results.push(newResult);
+      if (progressCb) {
+        progressCb('result', { result: newResult });
+      }
+    } else {
+      if (progressCb) {
+        progressCb('progress', { value: Math.min(currentWork / (totalWork || 1), 0.99) });
+      }
     }
-    return { results, totalDiscount };
+  }
+  return { results, totalDiscount };
 }
 
-
-// --- Web Worker Main Logic ---
 self.onmessage = async (event: MessageEvent<{ products: Product[], coupons: Coupon[], strategy?: 'default' | 'no-exceed' }>) => {
   const { products, coupons, strategy = 'default' } = event.data;
 
   const productPool = products.flatMap((p: Product) =>
     Array(p.count).fill(p.price).map((price, i) => ({ price, count: 1, id: `${p.price}-${i}` }))
   );
-  
+
   const initialCouponList = coupons.flatMap((c: Coupon) =>
     Array(c.count).fill({ amount: c.amount, percent: c.percent })
   );
@@ -216,25 +215,25 @@ self.onmessage = async (event: MessageEvent<{ products: Product[], coupons: Coup
     self.postMessage({ type: 'done' });
     return;
   }
-  
+
   const sortedCoupons = [...initialCouponList].sort((a, b) => {
-      if (strategy === 'no-exceed') return a.amount - b.amount || b.percent - a.percent;
-      return b.percent - a.percent || b.amount - a.amount;
+    if (strategy === 'no-exceed') return a.amount - b.amount || b.percent - a.percent;
+    return b.percent - a.percent || b.amount - a.amount;
   });
 
   const primaryRun = runOptimization(productPool, sortedCoupons, strategy, (type, payload) => {
-      self.postMessage({ type, ...payload });
+    self.postMessage({ type, ...payload });
   });
   self.postMessage({ type: 'done' });
-  
+
   if (strategy === 'default') {
     const noExceedSortedCoupons = [...initialCouponList].sort((a, b) => a.amount - b.amount || b.percent - a.percent);
     const secondaryRun = runOptimization(productPool, noExceedSortedCoupons, 'no-exceed');
-    
+
     if (secondaryRun.totalDiscount > primaryRun.totalDiscount) {
       self.postMessage({ type: 'recalculation-recommended' });
     }
   }
 };
 
-export {}; 
+export { }; 
