@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 쿠폰 최적 적용 계산기
 
-## Getting Started
+최신 Next.js(App Router) + TypeScript + TailwindCSS 기반의 **쿠폰 최적 적용 계산기**입니다. Web Worker를 활용한 백그라운드 연산으로 무거운 계산 중에도 UI 상호작용이 가능하며, View Transitions API를 이용한 부드러운 테마 전환 애니메이션을 제공합니다.
 
-First, run the development server:
+- **상품(가격, 수량)과 쿠폰(할인액, 할인율, 수량) 입력**
+- **Web Worker 기반 비동기 최적 쿠폰 조합 계산**
+- **총 결제 금액, 미적용 상품/쿠폰, 적용 내역 시각화**
+- **계산 진행률 실시간 표시 및 사용자 친화적 UI/UX**
+- **View Transitions API를 활용한 다크/라이트 모드 전환 애니메이션**
+- **반응형 디자인 (모바일/PC 지원)**
+- **결과 링크 공유 및 입력 상태 자동 저장**
+
+---
+
+## ✨ 주요 기능
+
+- **Next.js 15 (App Router), React 19, TypeScript, TailwindCSS**
+- **상품/쿠폰 정보 입력**: 직관적인 UI로 상품 가격, 쿠폰 종류(금액/비율) 및 수량을 쉽게 추가하고 관리할 수 있습니다.
+- **최적 조합 계산**: 동적 계획법(DP)과 그리디 알고리즘을 Web Worker에서 실행하여, 복잡한 계산 중에도 메인 스레드를 차단하지 않고 원활한 UI 경험을 제공합니다.
+- **결과 시각화**: 계산 완료 후, 총 결제 금액, 할인액, 사용된 쿠폰 내역과 미적용된 항목을 명확하게 보여줍니다.
+- **"최대 할인 적용" 재계산**: 기본 계산 로직보다 더 높은 할인이 가능한 조합이 감지되면, 사용자에게 재계산 옵션을 제공하여 최대 할인 혜택을 받을 수 있도록 돕습니다.
+- **다크/라이트 모드**: 사용자의 시스템 설정을 자동으로 감지하며, View Transitions API를 통해 버튼 클릭 위치에서부터 원이 퍼져나가는 듯한 아름다운 애니메이션과 함께 테마를 전환합니다.
+- **링크 공유 및 상태 저장**: 계산 결과를 담은 페이지의 URL을 복사하여 다른 사람과 쉽게 공유할 수 있습니다. 모든 입력 데이터는 브라우저의 `localStorage`에 자동으로 저장되어, 재방문 시에도 이전 작업을 이어서 할 수 있습니다.
+
+---
+
+## 🚀 사용법
+
+1.  **상품 입력**: 상품의 '가격'과 '수량'을 입력하고 `+` 버튼을 눌러 목록에 추가합니다.
+2.  **쿠폰 입력**: '할인액' 또는 '할인율(%)'과 '수량'을 입력하고 `+` 버튼을 눌러 추가합니다.
+3.  **계산하기**: '계산하기' 버튼을 누르면 결과 페이지로 이동하며, Web Worker가 백그라운드에서 최적의 쿠폰 조합을 계산합니다.
+4.  **결과 확인**: 계산이 완료되면 총 할인액, 최종 결제 금액 및 상세 적용 내역을 확인할 수 있습니다.
+5.  **(선택) 최대 할인 적용**: 더 나은 할인 조합이 가능한 경우 나타나는 '최대 할인 적용' 버튼을 클릭하여 결과를 최적화할 수 있습니다.
+6.  **공유 및 재사용**: '링크 공유' 버튼으로 결과를 공유하거나, 다음에 다시 방문했을 때 저장된 입력 값으로 계산을 이어갈 수 있습니다.
+
+---
+
+## 🛠️ 개발/실행
 
 ```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 실행 (Turbopack 사용)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# 브라우저에서 http://localhost:3000 에 접속합니다.
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 💡 기술 스택 및 핵심 로직
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+-   **Frontend**: Next.js 15 (React 19), TypeScript, TailwindCSS
+-   **State Management**: React Hooks (useState, useMemo, useContext)
+-   **Asynchronous Processing**: Web Workers를 사용하여 UI 블로킹 없이 무거운 계산 처리
+-   **Animation**: View Transitions API (테마 변경), Framer Motion (UI 인터랙션)
+-   **Styling**: next-themes, PostCSS, lucide-react (아이콘)
+-   **Deployment**: Vercel
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+궁금한 점이나 개선 제안은 언제든지 PR 또는 이슈로 남겨주세요!
