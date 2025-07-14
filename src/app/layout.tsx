@@ -6,6 +6,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { Providers } from "./providers";
 import Footer from "@/components/Footer";
 import { ThemeHandler } from "@/components/ThemeHandler";
+import AdBanner from "@/components/AdBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-gray-100 transition-colors duration-300`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-gray-100 transition-colors duration-300`}
       >
         <Providers>
           <ThemeHandler />
@@ -40,6 +41,9 @@ export default function RootLayout({
               <ThemeToggle />
             </div>
             <main className="flex-grow">{children}</main>
+            <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+              <AdBanner />
+            </div>
             <Footer />
           </div>
         </Providers>
