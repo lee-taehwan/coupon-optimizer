@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/_components/ui";
 import { Providers } from "./providers";
 import { Footer } from "@/_components/layout";
 import { ThemeHandler, ScrollController } from "@/_components/ui";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-gray-100 transition-colors duration-300`}
       >
         <Providers>
+          <Script
+            src="https://t1.daumcdn.net/kas/static/ba.min.js"
+            async
+            type="text/javascript"
+            strategy="afterInteractive"
+          />
           <ScrollController />
           <ThemeHandler />
           <div className="flex flex-col min-h-screen">
@@ -41,6 +48,15 @@ export default function RootLayout({
               <ThemeToggle />
             </div>
             <main className="flex-grow">{children}</main>
+            <div className="w-full flex justify-center items-center py-4">
+              <ins
+                className="kakao_ad_area"
+                style={{ display: "none" }}
+                data-ad-unit="DAN-D5PYicqSK3hSZsHW"
+                data-ad-width="300"
+                data-ad-height="250"
+              />
+            </div>
             <Footer />
           </div>
         </Providers>
