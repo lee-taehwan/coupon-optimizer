@@ -1,4 +1,4 @@
-import { Product, Coupon } from "@/context/InputContext";
+import { Product, Coupon } from "@/store/InputContext";
 
 export interface CouponApplyResult {
   id?: string;
@@ -23,7 +23,7 @@ export function createCouponOptimizerAsync(products: Product[], coupons: Coupon[
       worker.terminate();
     }
 
-    worker = new Worker(new URL('../workers/coupon-optimizer.worker.ts', import.meta.url), {
+    worker = new Worker(new URL('../lib/coupon-optimizer.worker.ts', import.meta.url), {
         type: 'module',
     });
 

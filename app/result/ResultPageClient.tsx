@@ -1,6 +1,6 @@
 'use client';
 
-import ResultCard, { UnusedCoupon } from "@/components/ResultCard";
+import { ResultCard, UnusedCoupon } from "@/_components/common";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -28,6 +28,11 @@ export default function ResultPageClient() {
     [queryString]
   );
   const hasInput = queryProducts.length > 0 && queryCoupons.length > 0;
+
+  // 페이지 로드 시 스크롤을 맨 위로 이동
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   const optimizer = useMemo(() => createCouponOptimizerAsync(queryProducts, queryCoupons), [queryProducts, queryCoupons]);
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { ThemeProvider } from 'next-themes';
-import { InputProvider } from '@/context/InputContext';
+import { InputProvider } from '@/store/InputContext';
 import React from 'react';
 
 export function Providers({ children }: { children: React.ReactNode }) {

@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Header from "@/components/Header";
-import ThemeToggle from "@/components/ThemeToggle";
+import "@/styles/globals.css";
+import { Header } from "@/_components/layout";
+import { ThemeToggle } from "@/_components/ui";
 import { Providers } from "./providers";
-import Footer from "@/components/Footer";
-import { ThemeHandler } from "@/components/ThemeHandler";
-import AdBanner from "@/components/AdBanner";
+import { Footer } from "@/_components/layout";
+import { ThemeHandler, ScrollController } from "@/_components/ui";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +33,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-gray-100 transition-colors duration-300`}
       >
         <Providers>
+          <ScrollController />
           <ThemeHandler />
           <div className="flex flex-col min-h-screen">
             <Header />
@@ -41,9 +41,6 @@ export default function RootLayout({
               <ThemeToggle />
             </div>
             <main className="flex-grow">{children}</main>
-            <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-              <AdBanner />
-            </div>
             <Footer />
           </div>
         </Providers>

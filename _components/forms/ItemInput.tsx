@@ -1,9 +1,9 @@
 'use client';
 import { useState, useEffect } from "react";
-import InputModal from "./InputModal";
+import { InputModal } from "@/_components/ui";
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence, animate } from 'framer-motion';
-import { Product, Coupon } from "@/context/InputContext";
+import { Product, Coupon } from "@/store/InputContext";
 
 type Item = Product | Coupon;
 

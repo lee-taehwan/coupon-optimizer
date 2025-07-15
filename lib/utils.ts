@@ -1,4 +1,4 @@
-import { Product, Coupon } from "@/context/InputContext";
+import { Product, Coupon } from "@/store/InputContext";
 
 export function encodeInputToQuery(products: Product[], coupons: Coupon[]) {
   const p = products.map((pr) => `${pr.price}x${pr.count}`).join(",");

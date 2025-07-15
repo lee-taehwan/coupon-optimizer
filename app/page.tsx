@@ -1,11 +1,11 @@
 'use client';
 
-import ItemInput from "@/components/ItemInput";
-import { useInputContext } from "@/context/InputContext";
+import { ItemInput } from "@/_components/forms";
+import { useInputContext } from "@/store/InputContext";
 import { encodeInputToQuery } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import InputModal from "@/components/InputModal";
+import { InputModal } from "@/_components/ui";
 
 export default function Home() {
   const { products, setProducts, coupons, setCoupons } = useInputContext();
@@ -32,7 +32,7 @@ export default function Home() {
     }
 
     const query = encodeInputToQuery(products, coupons);
-    router.push(`/result?${query}`);
+    router.push(`/result?${query}`, { scroll: true });
   };
 
   return (
