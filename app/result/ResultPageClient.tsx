@@ -2,7 +2,7 @@
 
 import { ResultCard, UnusedCoupon } from "@/_components/common";
 import Link from "next/link";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { decodeQueryToInput } from "@/lib/utils";
 import React from "react";
@@ -67,6 +67,12 @@ export default function ResultPageClient() {
   const totalPayment = totalOriginalPrice - totalDiscount;
   const isProgressVisible = !done && progress < 1;
   const hasResult = results.length > 0;
+  const isRecalculatedRef = useRef(false);
+  const prevTotalPaymentRef = useRef(0);
+  const prevTotalDiscountRef = useRef(0);
+  const resetKey = isRecalculatedRef.current
+    ? `recalc-${queryString}-${done}-${hasResult}`
+    : `init-${queryString}-${done}-${hasResult}`;
 
   const { unusedProducts, unusedCoupons } = useMemo(() => {
     if (!done) return { unusedProducts: [], unusedCoupons: [] };
@@ -110,12 +116,28 @@ export default function ResultPageClient() {
   };
   
   const handleRecalculate = () => {
+    isRecalculatedRef.current = true;
+    prevTotalPaymentRef.current = totalPayment;
+    prevTotalDiscountRef.current = totalDiscount;
     const currentParams = new URLSearchParams(searchParams.toString());
     currentParams.set('strategy', 'no-exceed');
     router.replace(`${pathname}?${currentParams.toString()}`);
   };
 
   const showRecalculateButton = done && canRecalculate && strategy === 'default';
+
+  useEffect(() => {
+    isRecalculatedRef.current = false;
+    prevTotalPaymentRef.current = 0;
+    prevTotalDiscountRef.current = 0;
+  }, [queryString]);
+
+  useEffect(() => {
+    if (isRecalculatedRef.current) {
+      prevTotalPaymentRef.current = totalPayment;
+      prevTotalDiscountRef.current = totalDiscount;
+    }
+  }, [isRecalculatedRef.current, totalPayment, totalDiscount]);
 
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 mt-8 flex flex-col gap-8 border border-slate-200 dark:border-slate-700 transition-colors">
@@ -139,14 +161,19 @@ export default function ResultPageClient() {
         <>
           <div className="flex flex-col gap-4">
             <ResultCard
+              key={queryString}
               results={results}
-              totalDiscount={totalDiscount}
-              totalPayment={totalPayment}
+              totalDiscount={hasResult ? totalDiscount : 0}
+              totalPayment={hasResult ? totalPayment : 0}
               unusedProducts={unusedProducts}
               unusedCoupons={unusedCoupons}
               progress={progress}
               isProgressVisible={isProgressVisible}
               hasResult={hasResult}
+              resetKey={resetKey}
+              isRecalculated={isRecalculatedRef.current}
+              prevTotalPayment={prevTotalPaymentRef.current}
+              prevTotalDiscount={prevTotalDiscountRef.current}
             />
             {done && (
               <div className="text-center text-green-600 dark:text-green-300 font-bold mt-4">

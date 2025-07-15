@@ -1,7 +1,7 @@
 'use client';
 import { CouponApplyResult } from "@/hooks/useCouponOptimizer";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
+import { useState, useEffect, useRef } from "react";
+import { useSpring, useTransition, animated } from '@react-spring/web';
 
 export interface UnusedCoupon {
   amount: number;
@@ -17,38 +17,39 @@ export interface ResultCardProps {
   progress: number;
   isProgressVisible: boolean;
   hasResult: boolean;
+  resetKey: string;
+  isRecalculated: boolean;
+  prevTotalPayment: number;
+  prevTotalDiscount: number;
 }
 
-function useAnimatedNumber(target: number, duration = 500) {
-  const [displayValue, setDisplayValue] = useState(target);
-  const motionValue = useMotionValue(target);
+function usePrevious<T>(value: T) {
+  const ref = useRef(value);
+  useEffect(() => { ref.current = value; }, [value]);
+  return ref.current;
+}
+
+function AnimatedNumber({ value }: { value: number }) {
+  const prev = usePrevious(value);
+  const isFirst = useRef(true);
+
+  const { number } = useSpring({
+    from: { number: isFirst.current ? 0 : prev ?? 0 },
+    number: value,
+    reset: isFirst.current || prev !== value,
+    config: { tension: 170, friction: 26 }
+  });
 
   useEffect(() => {
-    if (motionValue.get() === target) return;
+    isFirst.current = false;
+  }, []);
 
-    const unsubscribe = motionValue.on('change', (latest) => {
-      setDisplayValue(Math.round(latest));
-    });
-
-    const controls = animate(motionValue, target, { duration: duration / 1000, ease: "easeOut" });
-
-    return () => {
-      unsubscribe();
-      controls.stop();
-    };
-  }, [target, motionValue, duration]);
-
-  return displayValue;
+  return <animated.span>{number.to((n) => Math.round(n).toLocaleString())}</animated.span>;
 }
 
-interface ProgressSectionProps {
-  isLoading: boolean;
-  isProgressVisible: boolean;
-  progress: number;
-}
-
-function ProgressSection({ isLoading, isProgressVisible, progress }: ProgressSectionProps) {
-  if (isLoading && progress === 0) {
+function ProgressSection({ isLoading, isProgressVisible, progress }: { isLoading: boolean; isProgressVisible: boolean; progress: number; }) {
+  const { width } = useSpring({ width: isProgressVisible ? `${progress * 100}%` : '0%', config: { duration: 500 } });
+  if (isLoading && isProgressVisible) {
     return (
       <div className="flex flex-col items-center justify-center py-12 w-full">
         <div className="w-full max-w-xs mb-2">
@@ -59,51 +60,16 @@ function ProgressSection({ isLoading, isProgressVisible, progress }: ProgressSec
       </div>
     );
   }
-
-  if (!isProgressVisible || progress >= 1) {
-    return null;
-  }
-
+  if (!isProgressVisible || progress >= 1) return null;
   return (
-    <motion.div
-      className="flex flex-col items-center justify-center py-12 w-full"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="w-full max-w-xs mb-2">
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-blue-500"
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.floor(progress * 100)}%` }}
-            transition={{ duration: 0.3, ease: "linear" }}
-          />
-        </div>
-      </div>
-      <motion.div
-        className="text-gray-400 mb-2"
-        key={`text-${Math.floor(progress * 100)}`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3}}
-      >
-        계산 중...
-      </motion.div>
-      <motion.div
-        className="text-xs text-gray-500"
-        key={`progress-${Math.floor(progress * 100)}`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        진행률: {Math.floor(progress * 100)}%
-      </motion.div>
-    </motion.div>
+    <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-4">
+      <animated.div
+        className="h-full bg-slate-600 dark:bg-slate-400"
+        style={{ width }}
+      />
+    </div>
   );
 }
-
 
 export default function ResultCard({
   results,
@@ -114,11 +80,19 @@ export default function ResultCard({
   progress,
   isProgressVisible,
   hasResult,
+  isRecalculated,
+  prevTotalPayment,
+  prevTotalDiscount,
+  resetKey,
 }: ResultCardProps) {
+  const transitions = useTransition(results, {
+    from: { opacity: 0, y: 20, scale: 0.95 },
+    enter: { opacity: 1, y: 0, scale: 1 },
+    leave: { opacity: 0 },
+    config: { tension: 170, friction: 26 },
+    keys: results.map(r => r.id ?? String(Math.random())),
+  });
 
-  const animatedTotalPayment = useAnimatedNumber(totalPayment);
-  const animatedTotalDiscount = useAnimatedNumber(totalDiscount);
-  
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -128,7 +102,7 @@ export default function ResultCard({
             <div className="h-8 w-24 bg-slate-200 dark:bg-slate-600 rounded animate-pulse mb-1" />
           ) : (
             <div className="text-2xl font-extrabold text-slate-700 dark:text-slate-200">
-              {animatedTotalPayment.toLocaleString()}원
+              <AnimatedNumber value={totalPayment} />원
             </div>
           )}
         </div>
@@ -138,51 +112,42 @@ export default function ResultCard({
             <div className="h-8 w-24 bg-slate-200 dark:bg-slate-600 rounded animate-pulse mb-1" />
           ) : (
             <div className="text-2xl font-extrabold text-green-600 dark:text-green-400">
-              {animatedTotalDiscount.toLocaleString()}원
+              <AnimatedNumber value={totalDiscount} />원
             </div>
           )}
         </div>
       </div>
-      
       <div className="grid gap-4 md:grid-cols-2">
-        <AnimatePresence>
-          {results.map((r) => {
-            const subsetSum = r.applied.reduce((a, b) => a + b, 0);
-            return (
-              <motion.div
-                key={r.id}
-                layout
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, transition: { duration: 0.2 } }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 shadow-sm flex flex-col gap-2"
-              >
-                <div className="font-semibold text-slate-600 dark:text-slate-300">
-                  쿠폰 적용한도 {r.couponAmount.toLocaleString()}원 / {r.percent}% 할인
-                </div>
-                <div className="text-sm text-gray-500 dark:text-gray-300">적용 상품: {r.applied.map((p) => p.toLocaleString() + "원").join(", ")}</div>
-                <div className="text-xs text-gray-400 flex items-center gap-2">
-                  <span>합계: {subsetSum.toLocaleString()}원</span>
-                  {subsetSum > r.couponAmount && (
-                    <span className="text-red-500 font-semibold">
-                      (초과: {(subsetSum - r.couponAmount).toLocaleString()}원)
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs text-green-600 dark:text-green-400 font-bold">할인액: {r.discount.toLocaleString()}원</div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+        {transitions((style, r) => {
+          const subsetSum = r.applied.reduce((a: number, b: number) => a + b, 0);
+          return (
+            <animated.div
+              key={r.id}
+              style={style}
+              className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 shadow-sm flex flex-col gap-2"
+            >
+              <div className="font-semibold text-slate-600 dark:text-slate-300">
+                쿠폰 적용한도 {r.couponAmount.toLocaleString()}원 / {r.percent}% 할인
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-300">적용 상품: {r.applied.map((p: number) => p.toLocaleString() + "원").join(", ")}</div>
+              <div className="text-xs text-gray-400 flex items-center gap-2">
+                <span>합계: {subsetSum.toLocaleString()}원</span>
+                {subsetSum > r.couponAmount && (
+                  <span className="text-red-500 font-semibold">
+                    (초과: {(subsetSum - r.couponAmount).toLocaleString()}원)
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-green-600 dark:text-green-400 font-bold">할인액: {r.discount.toLocaleString()}원</div>
+            </animated.div>
+          );
+        })}
       </div>
-      
       <ProgressSection
         isLoading={!hasResult && progress === 0}
         isProgressVisible={isProgressVisible}
         progress={progress}
       />
-
       {(hasResult || !isProgressVisible) && (
         <div className="flex flex-col gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
           <div className="text-sm text-slate-700 dark:text-slate-300">

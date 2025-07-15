@@ -2,23 +2,23 @@
 import { useState, useEffect } from "react";
 import { InputModal } from "@/_components/ui";
 import { v4 as uuidv4 } from 'uuid';
-import { motion, AnimatePresence, animate } from 'framer-motion';
+import { useSpring, animated, useTransition } from '@react-spring/web';
 import { Product, Coupon } from "@/store/InputContext";
 
 type Item = Product | Coupon;
 
 function AnimatedCount({ count, unit }: { count: number; unit: string }) {
-  const [displayCount, setDisplayCount] = useState(count);
+  const { number } = useSpring({ number: count, config: { tension: 170, friction: 26 } });
+  return (
+    <span>
+      <animated.span>{number.to((n) => Math.round(n).toLocaleString())}</animated.span>{unit}
+    </span>
+  );
+}
 
-  useEffect(() => {
-    const controls = animate(displayCount, count, {
-      duration: 0.5,
-      onUpdate: (value) => setDisplayCount(Math.round(value))
-    });
-    return controls.stop;
-  }, [count]);
-
-  return <span>{displayCount.toLocaleString()}{unit}</span>;
+function AnimatedNumber({ value }: { value: number }) {
+  const { number } = useSpring({ number: value, config: { tension: 170, friction: 26 } });
+  return <animated.span>{number.to((n) => Math.round(n).toLocaleString())}</animated.span>;
 }
 
 interface ItemInputProps<T extends Item> {
@@ -153,12 +153,17 @@ export default function ItemInput<T extends Item>({
   const [animatedTotal, setAnimatedTotal] = useState(totalAmount);
 
   useEffect(() => {
-    const controls = animate(animatedTotal, totalAmount, {
-      duration: 0.5,
-      onUpdate: (value) => setAnimatedTotal(Math.round(value))
-    });
-    return controls.stop;
+    setAnimatedTotal(totalAmount);
   }, [totalAmount]);
+
+  // 리스트 애니메이션 트랜지션 생성
+  const transitions = useTransition(items, {
+    from: { opacity: 0, y: 20, scale: 0.95 },
+    enter: { opacity: 1, y: 0, scale: 1 },
+    leave: { opacity: 0, y: -20, scale: 0.95 },
+    keys: items.map(getItemKey),
+    config: { tension: 170, friction: 26 },
+  });
 
   return (
     <section className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
@@ -209,63 +214,47 @@ export default function ItemInput<T extends Item>({
         </button>
       </div>
       <div className="min-h-[34px]">
-        <AnimatePresence mode="wait">
-          {items.length === 0 ? (
-            <motion.div
-              key="empty-message"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="text-slate-500 text-sm text-center py-2"
-            >
-              {currentConfig.emptyMessage}
-            </motion.div>
-          ) : (
-            <motion.ul
-              key="items-list"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-1"
-            >
-              <AnimatePresence>
-                {items.map(item => {
-                  const key = getItemKey(item);
-                  return (
-                    <motion.li
-                      key={key}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                      className="flex items-center justify-between bg-white dark:bg-slate-700 rounded px-3 py-1 text-slate-700 dark:text-gray-300 transition-colors"
-                    >
-                      <span>
-                        {getItemDisplay(item)} ×
-                        <span className="ml-1">
-                          <AnimatedCount count={item.count} unit={currentConfig.unit} />
-                        </span>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveItem(key)}
-                        className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500 transition-colors text-xs ml-2"
-                      >
-                        삭제
-                      </button>
-                    </motion.li>
-                  );
-                })}
-              </AnimatePresence>
-            </motion.ul>
-          )}
-        </AnimatePresence>
+        {items.length === 0 ? (
+          <div
+            className="text-slate-500 text-sm text-center py-2"
+          >
+            {currentConfig.emptyMessage}
+          </div>
+        ) : (
+          <ul className="space-y-1">
+            {transitions((style, item) => {
+              const key = getItemKey(item);
+              return (
+                <animated.li
+                  key={key}
+                  style={{
+                    ...style,
+                    transform: style.y.to((y) => `translateY(${y}px)`) + ' ' + style.scale.to((s) => `scale(${s})`),
+                  }}
+                  className="flex items-center justify-between bg-white dark:bg-slate-700 rounded px-3 py-1 text-slate-700 dark:text-gray-300 transition-colors"
+                >
+                  <span>
+                    {getItemDisplay(item)} ×
+                    <span className="ml-1">
+                      <AnimatedCount count={item.count} unit={currentConfig.unit} />
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveItem(key)}
+                    className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500 transition-colors text-xs ml-2"
+                  >
+                    삭제
+                  </button>
+                </animated.li>
+              );
+            })}
+          </ul>
+        )}
       </div>
       {currentConfig.showTotal && items.length > 0 && (
         <div className="mt-3 bg-slate-200 dark:bg-slate-700 rounded-lg p-3 text-center text-slate-800 dark:text-slate-200 font-bold shadow-inner transition-colors">
-          {currentConfig.totalTitle}: {animatedTotal.toLocaleString()}원
+          {currentConfig.totalTitle}: <AnimatedNumber value={totalAmount} />원
         </div>
       )}
     </section>
