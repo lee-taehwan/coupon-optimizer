@@ -1,4 +1,5 @@
 /// <reference lib="webworker" />
+import { v4 as uuidv4 } from 'uuid';
 
 export interface Product {
   price: number;
@@ -181,7 +182,7 @@ function runOptimization(
       totalDiscount += bestDiscount;
       bestSubset.forEach(p => usedProductIds.add(p.id));
       const newResult: CouponApplyResult = {
-        id: `coupon-${strategy}-${i}-${Date.now()}`,
+        id: uuidv4(),
         couponAmount: coupon.amount,
         percent: coupon.percent,
         applied: bestSubset.map(p => p.price),

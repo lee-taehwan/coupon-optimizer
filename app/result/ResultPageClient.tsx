@@ -124,7 +124,14 @@ export default function ResultPageClient() {
     router.replace(`${pathname}?${currentParams.toString()}`);
   };
 
+  const handleGoBack = () => {
+    const currentParams = new URLSearchParams(searchParams.toString());
+    currentParams.delete('strategy');
+    router.replace(`${pathname}?${currentParams.toString()}`);
+  };
+
   const showRecalculateButton = done && canRecalculate && strategy === 'default';
+  const showGoBackButton = strategy === 'no-exceed';
 
   useEffect(() => {
     isRecalculatedRef.current = false;
@@ -161,7 +168,6 @@ export default function ResultPageClient() {
         <>
           <div className="flex flex-col gap-4">
             <ResultCard
-              key={queryString}
               results={results}
               totalDiscount={hasResult ? totalDiscount : 0}
               totalPayment={hasResult ? totalPayment : 0}
@@ -191,6 +197,14 @@ export default function ResultPageClient() {
               className="px-4 py-2 rounded bg-slate-600 text-white hover:bg-slate-700 transition font-semibold"
             >
               최대할인적용
+            </button>
+          )}
+          {showGoBackButton && (
+            <button 
+              onClick={handleGoBack}
+              className="px-4 py-2 rounded bg-slate-600 text-white hover:bg-slate-700 transition font-semibold"
+            >
+              이전계산보기
             </button>
           )}
         </div>

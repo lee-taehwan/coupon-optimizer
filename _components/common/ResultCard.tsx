@@ -80,17 +80,12 @@ export default function ResultCard({
   progress,
   isProgressVisible,
   hasResult,
-  isRecalculated,
-  prevTotalPayment,
-  prevTotalDiscount,
-  resetKey,
 }: ResultCardProps) {
   const transitions = useTransition(results, {
     from: { opacity: 0, y: 20, scale: 0.95 },
     enter: { opacity: 1, y: 0, scale: 1 },
-    leave: { opacity: 0 },
-    config: { tension: 170, friction: 26 },
     keys: results.map(r => r.id ?? String(Math.random())),
+    config: { tension: 170, friction: 26 },
   });
 
   return (
@@ -117,11 +112,11 @@ export default function ResultCard({
           )}
         </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <ul className="space-y-1">
         {transitions((style, r) => {
           const subsetSum = r.applied.reduce((a: number, b: number) => a + b, 0);
           return (
-            <animated.div
+            <animated.li
               key={r.id}
               style={style}
               className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 shadow-sm flex flex-col gap-2"
@@ -139,30 +134,43 @@ export default function ResultCard({
                 )}
               </div>
               <div className="text-xs text-green-600 dark:text-green-400 font-bold">할인액: {r.discount.toLocaleString()}원</div>
-            </animated.div>
+            </animated.li>
           );
         })}
-      </div>
+      </ul>
       <ProgressSection
         isLoading={!hasResult && progress === 0}
         isProgressVisible={isProgressVisible}
         progress={progress}
       />
-      {(hasResult || !isProgressVisible) && (
-        <div className="flex flex-col gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
-          <div className="text-sm text-slate-700 dark:text-slate-300">
-            <span className="font-semibold">미적용 상품:</span> {unusedProducts.length === 0 ? "없음" : unusedProducts.map((p) => p.toLocaleString() + "원").join(", ")}
-          </div>
-          <div className="text-sm text-slate-700 dark:text-slate-300">
-            <span className="font-semibold">미사용 쿠폰:</span> {unusedCoupons.length === 0 ? "없음" : unusedCoupons.map((c, i) => (
-              <span key={`${c.amount}_${c.percent}_${i}`}>
-                적용한도 {c.amount.toLocaleString()}원 / {c.percent}% 할인
-                {i < unusedCoupons.length - 1 && <span className="text-slate-400 dark:text-slate-500">, </span>}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="flex flex-col gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+        {isProgressVisible ? (
+          <>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-semibold text-slate-700 dark:text-slate-300">미적용 상품:</span>
+              <div className="h-4 bg-slate-200 dark:bg-slate-600 rounded animate-pulse flex-grow max-w-xs" />
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-semibold text-slate-700 dark:text-slate-300">미사용 쿠폰:</span>
+              <div className="h-4 bg-slate-200 dark:bg-slate-600 rounded animate-pulse flex-grow max-w-sm" />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="text-sm text-slate-700 dark:text-slate-300">
+              <span className="font-semibold">미적용 상품:</span> {unusedProducts.length === 0 ? "없음" : unusedProducts.map((p) => p.toLocaleString() + "원").join(", ")}
+            </div>
+            <div className="text-sm text-slate-700 dark:text-slate-300">
+              <span className="font-semibold">미사용 쿠폰:</span> {unusedCoupons.length === 0 ? "없음" : unusedCoupons.map((c, i) => (
+                <span key={`${c.amount}_${c.percent}_${i}`}>
+                  적용한도 {c.amount.toLocaleString()}원 / {c.percent}% 할인
+                  {i < unusedCoupons.length - 1 && <span className="text-slate-400 dark:text-slate-500">, </span>}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
