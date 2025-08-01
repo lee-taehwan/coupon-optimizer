@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex flex-col items-center gap-4">
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            &copy; {new Date().getFullYear()} lee-taehwan. All rights reserved.
+            &copy; 2025. lee-taehwan All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             <a href="https://github.com/lee-taehwan" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">
