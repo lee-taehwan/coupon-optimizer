@@ -20,7 +20,7 @@ const Footer: React.FC = () => {
             {/* <a href="#" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">
               <SiLinkedin size={20} />
             </a> */}
-            <a href="https://lee-taehwan.github.io" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">
+            <a href="https://lee-taehwan.vercel.app" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">
               <TbWorld size={22} />
             </a>
             <a href="mailto:soslth@naver.com" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">
