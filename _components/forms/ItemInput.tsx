@@ -253,7 +253,7 @@ export default function ItemInput<T extends Item>({
         )}
       </div>
       {currentConfig.showTotal && items.length > 0 && (
-        <div className="mt-3 bg-slate-200 dark:bg-slate-700 rounded-lg p-3 text-center text-slate-800 dark:text-slate-200 font-bold shadow-inner transition-colors">
+        <div className="mt-3 bg-white dark:bg-slate-700 rounded-lg p-3 text-center text-slate-700 dark:text-gray-300 font-bold shadow-inner transition-colors">
           {currentConfig.totalTitle}: <AnimatedNumber value={totalAmount} />원
         </div>
       )}
