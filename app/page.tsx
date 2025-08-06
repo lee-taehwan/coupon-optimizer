@@ -1,11 +1,11 @@
 'use client';
 
-import { ItemInput } from "@/_components/forms";
+import { ItemInput } from "@/components/forms";
 import { useInputContext } from "@/store/InputContext";
 import { encodeInputToQuery } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { InputModal } from "@/_components/ui";
+import { InputModal } from "@/components/ui";
 
 export default function Home() {
   const { products, setProducts, coupons, setCoupons } = useInputContext();

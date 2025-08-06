@@ -1,6 +1,6 @@
 'use client';
 
-import { ResultCard, UnusedCoupon } from "@/_components/common";
+import { ResultCard, UnusedCoupon } from "@/components/common";
 import Link from "next/link";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";

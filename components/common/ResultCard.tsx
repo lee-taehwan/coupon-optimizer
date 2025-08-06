@@ -1,6 +1,7 @@
 'use client';
+
 import { CouponApplyResult } from "@/hooks/useCouponOptimizer";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useSpring, useTransition, animated } from '@react-spring/web';
 
 export interface UnusedCoupon {

@@ -29,14 +29,14 @@ const InputModal: React.FC<InputModalProps> = ({ open, message, onClose }) => {
       {transitions((styles, item) =>
         item ? (
           <animated.div
-            style={styles as any}
+            style={styles}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
             onClick={onClose}
           >
             {modalTransitions((modalStyles, modalItem) =>
               modalItem ? (
                 <animated.div
-                  style={{ ...modalStyles, transform: modalStyles.y.to(y => `translateY(${y}px)`) } as any}
+                  style={modalStyles}
                   className="bg-slate-100 dark:bg-slate-800 rounded-lg shadow-lg p-6 min-w-[280px] flex flex-col items-center"
                   onClick={e => e.stopPropagation()}
                 >

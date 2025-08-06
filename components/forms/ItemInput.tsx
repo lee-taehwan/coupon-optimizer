@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from "react";
-import { InputModal } from "@/_components/ui";
+import { useState } from "react";
+import { InputModal } from "@/components/ui";
 import { v4 as uuidv4 } from 'uuid';
 import { useSpring, animated, useTransition } from '@react-spring/web';
 import { Product, Coupon } from "@/store/InputContext";
@@ -150,12 +150,6 @@ export default function ItemInput<T extends Item>({
     return sum;
   }, 0) : 0;
 
-  const [animatedTotal, setAnimatedTotal] = useState(totalAmount);
-
-  useEffect(() => {
-    setAnimatedTotal(totalAmount);
-  }, [totalAmount]);
-
   // 리스트 애니메이션 트랜지션 생성
   const transitions = useTransition(items, {
     from: { opacity: 0, y: 20, scale: 0.95 },
@@ -171,6 +165,8 @@ export default function ItemInput<T extends Item>({
       <InputModal open={!!modalMsg} message={modalMsg} onClose={() => setModalMsg("")} />
       <div className="flex gap-2 mb-2 items-center">
         <input
+          name={`${type}-amount`}
+          id={`${type}-amount`}
           type="number"
           min={1}
           placeholder={currentConfig.placeholder}
@@ -181,6 +177,8 @@ export default function ItemInput<T extends Item>({
         />
         {currentConfig.showPercent && (
           <input
+            name={`${type}-percent`}
+            id={`${type}-percent`}
             type="number"
             min={1}
             max={100}
@@ -193,6 +191,8 @@ export default function ItemInput<T extends Item>({
           />
         )}
         <input
+          name={`${type}-count`}
+          id={`${type}-count`}
           type="number"
           min={1}
           placeholder="수량"
