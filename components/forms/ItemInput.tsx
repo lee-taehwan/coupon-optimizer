@@ -1,9 +1,10 @@
 'use client';
 import { useState } from "react";
-import { InputModal } from "@/components/ui";
+import { InputModal, CouponSelectModal } from "@/components/ui";
 import { v4 as uuidv4 } from 'uuid';
 import { useSpring, animated, useTransition } from '@react-spring/web';
 import { Product, Coupon } from "@/store/InputContext";
+import { PresetCoupon, convertPresetToCoupon } from "@/lib/preset-coupons";
 
 type Item = Product | Coupon;
 
@@ -36,7 +37,7 @@ export const ItemInput = <T extends Item>({
   const [percent, setPercent] = useState("40");
   const [count, setCount] = useState("1");
   const [modalMsg, setModalMsg] = useState("");
-  const [isComposing, setIsComposing] = useState(false);
+  const [showCouponSelectModal, setShowCouponSelectModal] = useState(false);
 
   const config = {
     product: {
@@ -140,6 +141,15 @@ export const ItemInput = <T extends Item>({
     setCount("1");
   };
 
+  const handleCouponSelect = (presetCoupon: PresetCoupon) => {
+    const couponData = convertPresetToCoupon(presetCoupon);
+    addItem({
+      input: couponData.amount,
+      percent: couponData.percent,
+      count: couponData.count
+    });
+  };
+
   // 숫자 입력 검증 및 알럿
   const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // 모달이 열려 있을 때는 키 이벤트 처리하지 않음
@@ -182,15 +192,8 @@ export const ItemInput = <T extends Item>({
     return numericValue;
   };
 
-  // IME 입력 시작 처리
-  const handleCompositionStart = () => {
-    setIsComposing(true);
-  };
-
   // IME 입력 종료 처리
   const handleCompositionEnd = (e: React.CompositionEvent<HTMLInputElement>) => {
-    setIsComposing(false);
-    
     // 모달이 열려 있을 때는 처리하지 않음
     if (modalMsg) {
       return;
@@ -231,8 +234,26 @@ export const ItemInput = <T extends Item>({
 
   return (
     <section className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
-      <h2 className="text-xl font-semibold mb-2 text-slate-800 dark:text-gray-200">{currentConfig.title}</h2>
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-gray-200">{currentConfig.title}</h2>
+        {type === 'coupon' && (
+          <button
+            type="button"
+            onClick={() => setShowCouponSelectModal(true)}
+            className="px-3 py-1 rounded bg-slate-600 text-white text-sm font-semibold shadow hover:bg-slate-700 transition"
+          >
+            쿠폰 선택
+          </button>
+        )}
+      </div>
       <InputModal open={!!modalMsg} message={modalMsg} onClose={() => setModalMsg("")} />
+      {type === 'coupon' && (
+        <CouponSelectModal 
+          open={showCouponSelectModal}
+          onClose={() => setShowCouponSelectModal(false)}
+          onSelect={handleCouponSelect}
+        />
+      )}
       <div className="flex gap-2 mb-2 items-center">
         <input
           name={`${type}-amount`}
@@ -244,7 +265,6 @@ export const ItemInput = <T extends Item>({
           value={input}
           onChange={(e) => setInput(handleNumericInput(e.target.value))}
           onKeyDown={handleNumericKeyDown}
-          onCompositionStart={handleCompositionStart}
           onCompositionEnd={handleCompositionEnd}
         />
         {currentConfig.showPercent && (
@@ -260,7 +280,6 @@ export const ItemInput = <T extends Item>({
             onChange={(e) => setPercent(handleNumericInput(e.target.value))}
             onFocus={() => setPercent("")}
             onKeyDown={handleNumericKeyDown}
-            onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
           />
         )}
@@ -275,7 +294,6 @@ export const ItemInput = <T extends Item>({
           onChange={(e) => setCount(handleNumericInput(e.target.value))}
           onFocus={() => setCount("")}
           onKeyDown={handleNumericKeyDown}
-          onCompositionStart={handleCompositionStart}
           onCompositionEnd={handleCompositionEnd}
         />
         <button
