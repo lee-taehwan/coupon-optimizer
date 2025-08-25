@@ -6,7 +6,7 @@ import { ReactNode } from 'react';
 import { ThemeToggle } from "@/components/ui";
 import Script from "next/script";
 
-export function LayoutRenderer({ children }: { children: ReactNode }) {
+export const LayoutRenderer = ({ children }: { children: ReactNode }) => {
   const selectedLayoutSegment = useSelectedLayoutSegment();
   const isNotFound = selectedLayoutSegment === '/_not-found';
   

@@ -3,7 +3,7 @@
 import { useTheme } from 'next-themes';
 import React, { useEffect, useState } from 'react';
 
-export default function ThemeToggle() {
+export const ThemeToggle = () => {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
 

@@ -23,12 +23,12 @@ interface DpNode {
   prev: DpNode | null;
 }
 
-function findBestSubsetForCouponDP(
+const findBestSubsetForCouponDP = (
   availableProducts: (Product & { id: string })[],
   coupon: { amount: number; percent: number },
   strategy: 'default' | 'no-exceed',
   progressCb?: (step: number, total: number) => void
-) {
+) => {
   const { amount, percent } = coupon;
   const totalSum = availableProducts.reduce((sum, p) => sum + p.price, 0);
 
@@ -114,11 +114,11 @@ function findBestSubsetForCouponDP(
   return { bestSubset, bestDiscount };
 }
 
-function findBestSubsetGreedy(
+const findBestSubsetGreedy = (
   availableProducts: (Product & { id: string })[],
   coupon: { amount: number; percent: number },
   progressCb?: (step: number, total: number) => void
-) {
+) => {
   const { amount, percent } = coupon;
 
   const sortedProducts = [...availableProducts].sort((a, b) => b.price - a.price);
@@ -145,12 +145,12 @@ function findBestSubsetGreedy(
   return { bestSubset, bestDiscount };
 }
 
-function runOptimization(
+const runOptimization = (
   productPool: (Product & { id: string })[],
   couponList: Coupon[],
   strategy: 'default' | 'no-exceed',
   progressCb?: (type: string, payload: { value?: number; result?: CouponApplyResult; }) => void
-): { results: CouponApplyResult[], totalDiscount: number } {
+): { results: CouponApplyResult[], totalDiscount: number } => {
   let totalDiscount = 0;
   const results: CouponApplyResult[] = [];
   const usedProductIds = new Set<string>();

@@ -48,7 +48,7 @@ function AnimatedNumber({ value }: { value: number }) {
   return <animated.span>{number.to((n) => Math.round(n).toLocaleString())}</animated.span>;
 }
 
-function ProgressSection({ isLoading, isProgressVisible, progress }: { isLoading: boolean; isProgressVisible: boolean; progress: number; }) {
+const ProgressSection = ({ isLoading, isProgressVisible, progress }: { isLoading: boolean; isProgressVisible: boolean; progress: number; }) => {
   const { width } = useSpring({ width: isProgressVisible ? `${progress * 100}%` : '0%', config: { duration: 500 } });
   if (isLoading && isProgressVisible) {
     return (
@@ -72,7 +72,7 @@ function ProgressSection({ isLoading, isProgressVisible, progress }: { isLoading
   );
 }
 
-export default function ResultCard({
+export const ResultCard = ({
   results,
   totalDiscount,
   totalPayment,
@@ -81,7 +81,7 @@ export default function ResultCard({
   progress,
   isProgressVisible,
   hasResult,
-}: ResultCardProps) {
+}: ResultCardProps) => {
   const transitions = useTransition(results, {
     from: { opacity: 0, y: 20, scale: 0.95 },
     enter: { opacity: 1, y: 0, scale: 1 },

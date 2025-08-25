@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import ResultPageClient from './ResultPageClient';
 
-function ResultPageSkeleton() {
+const ResultPageSkeleton = () => {
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 mt-8 flex flex-col gap-8 border border-slate-200 dark:border-slate-700 transition-colors animate-pulse">
       <div className="flex justify-between items-center mb-2">

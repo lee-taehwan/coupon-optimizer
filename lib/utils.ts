@@ -1,12 +1,12 @@
 import { Product, Coupon } from "@/store/InputContext";
 
-export function encodeInputToQuery(products: Product[], coupons: Coupon[]) {
+export const encodeInputToQuery = (products: Product[], coupons: Coupon[]) => {
   const p = products.map((pr) => `${pr.price}x${pr.count}`).join(",");
   const c = coupons.map((cu) => `${cu.amount}x${cu.percent}x${cu.count}`).join(",");
   return `p=${encodeURIComponent(p)}&c=${encodeURIComponent(c)}`;
 }
 
-export function decodeQueryToInput(query: string) {
+export const decodeQueryToInput = (query: string) => {
   const params = new URLSearchParams(query);
   const p = params.get("p") || "";
   const c = params.get("c") || "";

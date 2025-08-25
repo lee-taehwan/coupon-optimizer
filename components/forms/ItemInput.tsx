@@ -7,7 +7,7 @@ import { Product, Coupon } from "@/store/InputContext";
 
 type Item = Product | Coupon;
 
-function AnimatedCount({ count, unit }: { count: number; unit: string }) {
+const AnimatedCount = ({ count, unit }: { count: number; unit: string }) => {
   const { number } = useSpring({ number: count, config: { tension: 170, friction: 26 } });
   return (
     <span>
@@ -16,7 +16,7 @@ function AnimatedCount({ count, unit }: { count: number; unit: string }) {
   );
 }
 
-function AnimatedNumber({ value }: { value: number }) {
+const AnimatedNumber = ({ value }: { value: number }) => {
   const { number } = useSpring({ number: value, config: { tension: 170, friction: 26 } });
   return <animated.span>{number.to((n) => Math.round(n).toLocaleString())}</animated.span>;
 }
@@ -27,15 +27,16 @@ interface ItemInputProps<T extends Item> {
   setItems: React.Dispatch<React.SetStateAction<T[]>>;
 }
 
-export default function ItemInput<T extends Item>({
+export const ItemInput = <T extends Item>({
   type,
   items,
   setItems
-}: ItemInputProps<T>) {
+}: ItemInputProps<T>) => {
   const [input, setInput] = useState("");
   const [percent, setPercent] = useState("40");
   const [count, setCount] = useState("1");
   const [modalMsg, setModalMsg] = useState("");
+  const [isComposing, setIsComposing] = useState(false);
 
   const config = {
     product: {
@@ -139,8 +140,77 @@ export default function ItemInput<T extends Item>({
     setCount("1");
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") handleAddItem();
+  // 숫자 입력 검증 및 알럿
+  const handleNumericKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // 모달이 열려 있을 때는 키 이벤트 처리하지 않음
+    if (modalMsg) {
+      e.preventDefault();
+      return;
+    }
+    
+    // 허용할 키들: 숫자, Backspace, Delete, Tab, Enter, Arrow keys 등
+    const allowedKeys = [
+      'Backspace', 'Delete', 'Tab', 'Enter', 'Escape',
+      'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+      'Home', 'End'
+    ];
+    
+    // 숫자 키 (0-9)와 허용된 키들은 통과
+    if (
+      (e.key >= '0' && e.key <= '9') || 
+      allowedKeys.includes(e.key) ||
+      e.ctrlKey || e.metaKey // Ctrl+A, Ctrl+C 등 허용
+    ) {
+      if (e.key === "Enter") handleAddItem();
+      return;
+    }
+    
+    // 숫자가 아닌 문자 입력 시 알럿 띄우고 입력 차단
+    e.preventDefault();
+    setModalMsg("숫자만 입력가능합니다.");
+  };
+
+  // 숫자만 입력 가능하도록 필터링 (복사&붙여넣기 대응)
+  const handleNumericInput = (value: string) => {
+    const numericValue = value.replace(/[^0-9]/g, "");
+    
+    // 숫자가 아닌 문자가 제거되었다면 알럿 표시
+    if (value !== numericValue && value.length > 0) {
+      setModalMsg("숫자만 입력가능합니다.");
+    }
+    
+    return numericValue;
+  };
+
+  // IME 입력 시작 처리
+  const handleCompositionStart = () => {
+    setIsComposing(true);
+  };
+
+  // IME 입력 종료 처리
+  const handleCompositionEnd = (e: React.CompositionEvent<HTMLInputElement>) => {
+    setIsComposing(false);
+    
+    // 모달이 열려 있을 때는 처리하지 않음
+    if (modalMsg) {
+      return;
+    }
+    
+    const value = e.currentTarget.value;
+    const numericValue = value.replace(/[^0-9]/g, "");
+    
+    if (value !== numericValue) {
+      setModalMsg("숫자만 입력가능합니다.");
+      // 입력 필드에 따라 적절한 state 업데이트
+      const fieldName = e.currentTarget.name;
+      if (fieldName.includes('amount')) {
+        setInput(numericValue);
+      } else if (fieldName.includes('percent')) {
+        setPercent(numericValue);
+      } else if (fieldName.includes('count')) {
+        setCount(numericValue);
+      }
+    }
   };
 
   const totalAmount = currentConfig.showTotal ? items.reduce((sum, item) => {
@@ -152,9 +222,9 @@ export default function ItemInput<T extends Item>({
 
   // 리스트 애니메이션 트랜지션 생성
   const transitions = useTransition(items, {
-    from: { opacity: 0, y: 20, scale: 0.95 },
-    enter: { opacity: 1, y: 0, scale: 1 },
-    leave: { opacity: 0, y: -20, scale: 0.95 },
+    from: { opacity: 0, y: 20, scale: 0.1 },
+    enter: { opacity: 1, y: 0, scale: 0.1 },
+    leave: { opacity: 0, y: -20, scale: 0.1 },
     keys: items.map(getItemKey),
     config: { tension: 170, friction: 26 },
   });
@@ -172,8 +242,10 @@ export default function ItemInput<T extends Item>({
           placeholder={currentConfig.placeholder}
           className={`border rounded px-3 py-2 ${currentConfig.showPercent ? 'flex-1 min-w-0' : 'w-full'} focus:outline-none focus:ring-2 focus:ring-slate-500 bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white transition-colors`}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onChange={(e) => setInput(handleNumericInput(e.target.value))}
+          onKeyDown={handleNumericKeyDown}
+          onCompositionStart={handleCompositionStart}
+          onCompositionEnd={handleCompositionEnd}
         />
         {currentConfig.showPercent && (
           <input
@@ -185,9 +257,11 @@ export default function ItemInput<T extends Item>({
             placeholder="퍼센트"
             className="border rounded h-[42px] w-[60px] px-0 py-0 text-center focus:outline-none focus:ring-2 focus:ring-slate-500 bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white transition-colors"
             value={percent}
-            onChange={(e) => setPercent(e.target.value)}
+            onChange={(e) => setPercent(handleNumericInput(e.target.value))}
             onFocus={() => setPercent("")}
-            onKeyDown={handleKeyDown}
+            onKeyDown={handleNumericKeyDown}
+            onCompositionStart={handleCompositionStart}
+            onCompositionEnd={handleCompositionEnd}
           />
         )}
         <input
@@ -198,9 +272,11 @@ export default function ItemInput<T extends Item>({
           placeholder="수량"
           className="border rounded h-[42px] w-[42px] px-0 py-0 text-center focus:outline-none focus:ring-2 focus:ring-slate-500 bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white transition-colors"
           value={count}
-          onChange={(e) => setCount(e.target.value)}
+          onChange={(e) => setCount(handleNumericInput(e.target.value))}
           onFocus={() => setCount("")}
-          onKeyDown={handleKeyDown}
+          onKeyDown={handleNumericKeyDown}
+          onCompositionStart={handleCompositionStart}
+          onCompositionEnd={handleCompositionEnd}
         />
         <button
           type="button"

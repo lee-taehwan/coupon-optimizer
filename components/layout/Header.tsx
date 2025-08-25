@@ -1,4 +1,4 @@
-export default function Header() {
+export const Header = () => {
   return (
     <header className="w-full py-6 flex flex-col items-center justify-center bg-white dark:bg-slate-900 shadow-sm backdrop-blur border-b border-slate-200 dark:border-slate-700 transition-colors">
       <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-50">쿠폰 최적 적용 계산기</h1>

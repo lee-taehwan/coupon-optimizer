@@ -1,29 +1,7 @@
-'use client';
-
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { NotFoundClient } from '@/app/NotFoundClient';
 
 export default function NotFound() {
-  const countdownTime = 5;
-  const [countdown, setCountdown] = useState(countdownTime);
-  const router = useRouter();
-  
-  useEffect(() => {
-    const redirectTimer = setTimeout(() => {
-      router.push('/');
-    }, countdownTime * 1000);
-  
-    const countdownInterval = setInterval(() => {
-      setCountdown((prevCountdown) => (prevCountdown > 0 ? prevCountdown - 1 : 0));
-    }, 1000);
-  
-    return () => {
-      clearTimeout(redirectTimer);
-      clearInterval(countdownInterval);
-    };
-  }, [router]);
-  
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-slate-900">
       <div className="text-center">
@@ -35,9 +13,7 @@ export default function NotFound() {
             홈으로 이동
           </Link>
         </div>
-        <p className="mt-4 text-slate-500 dark:text-slate-500">
-          {countdown}초 후 자동으로 홈으로 이동합니다.
-        </p>
+        <NotFoundClient />
       </div>
     </div>
   );

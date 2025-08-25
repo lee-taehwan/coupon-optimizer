@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 const lightColor = '#f1f5f9';
 const darkColor = '#020617';
 
-export function ThemeHandler() {
+export const ThemeHandler = () => {
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {

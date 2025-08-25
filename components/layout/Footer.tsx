@@ -4,7 +4,7 @@ import { SiGithub, SiInstagram } from 'react-icons/si';
 import { TbWorld } from 'react-icons/tb';
 import { FiMail } from 'react-icons/fi';
 
-const Footer: React.FC = () => {
+const Footer = () => {
   return (
     <footer className="w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -36,4 +36,4 @@ const Footer: React.FC = () => {
   );
 };
 
-export default Footer; 
+export { Footer }; 

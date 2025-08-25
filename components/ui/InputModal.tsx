@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useTransition, animated } from '@react-spring/web';
 
 interface InputModalProps {
@@ -9,7 +9,28 @@ interface InputModalProps {
   onClose: () => void;
 }
 
-const InputModal: React.FC<InputModalProps> = ({ open, message, onClose }) => {
+const InputModal = ({ open, message, onClose }: InputModalProps) => {
+  // 엔터 키와 ESC 키로 모달 닫기
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }
+    };
+
+    // 모달이 열려 있을 때만 이벤트 리스너 등록 (캡처링 단계에서)
+    if (open) {
+      document.addEventListener('keydown', handleKeyDown, true);
+    }
+
+    // 클린업 함수로 이벤트 리스너 제거
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, [open, onClose]);
+
   const transitions = useTransition(open, {
     from: { opacity: 0 },
     enter: { opacity: 1 },
@@ -57,4 +78,4 @@ const InputModal: React.FC<InputModalProps> = ({ open, message, onClose }) => {
   );
 };
 
-export default InputModal; 
+export { InputModal };

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-export function ScrollController() {
+export const ScrollController = () => {
   useEffect(() => {
     if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';

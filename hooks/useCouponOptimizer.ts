@@ -11,14 +11,14 @@ export interface CouponApplyResult {
 /**
  * 비동기 최적화 함수 (Web Worker 사용)
  */
-export function createCouponOptimizerAsync(products: Product[], coupons: Coupon[]) {
+export const createCouponOptimizerAsync = (products: Product[], coupons: Coupon[]) => {
   let worker: Worker | null = null;
 
-  async function run(
+  const run = async (
     onResult: (partial: CouponApplyResult[], done: boolean, progress: number) => void,
     onRecalculationRecommended: () => void,
     strategy: 'default' | 'no-exceed' = 'default'
-  ) {
+  ) => {
     if (worker) {
       worker.terminate();
     }
