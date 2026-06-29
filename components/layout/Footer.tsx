@@ -2,7 +2,7 @@ import React from 'react';
 // import { SiGithub, SiInstagram } from 'react-icons/si';
 // import { SiGithub, SiInstagram, SiLinkedin } from 'react-icons/si';
 // import { TbWorld } from 'react-icons/tb';
-// import { FiMail } from 'react-icons/fi';
+import { FiMail } from 'react-icons/fi';
 
 const Footer = () => {
   return (
@@ -12,20 +12,20 @@ const Footer = () => {
           <p className="text-sm text-slate-600 dark:text-slate-400">
             &copy; 2026. All rights reserved.
           </p>
-          {/* <div className="flex items-center gap-4">
-            <a href="https://github.com/lee-taehwan" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">
+          <div className="flex items-center gap-4">
+            {/* <a href="https://github.com/lee-taehwan" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">
               <SiGithub size={20} />
             </a>
             <a href="https://po-fol.vercel.app/view/leetaehwan" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">
               <TbWorld size={22} />
-            </a>
+            </a> */}
             <a href="mailto:soslth@naver.com" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">
               <FiMail size={22} />
             </a>
-            <a href="https://www.instagram.com/tae.fit_45" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">
+            {/* <a href="https://www.instagram.com/tae.fit_45" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">
               <SiInstagram size={20} />
-            </a>
-          </div> */}
+            </a> */}
+          </div>
         </div>
       </div>
     </footer>
