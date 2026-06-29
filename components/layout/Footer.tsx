@@ -1,8 +1,8 @@
 import React from 'react';
-import { SiGithub, SiInstagram } from 'react-icons/si';
+// import { SiGithub, SiInstagram } from 'react-icons/si';
 // import { SiGithub, SiInstagram, SiLinkedin } from 'react-icons/si';
-import { TbWorld } from 'react-icons/tb';
-import { FiMail } from 'react-icons/fi';
+// import { TbWorld } from 'react-icons/tb';
+// import { FiMail } from 'react-icons/fi';
 
 const Footer = () => {
   return (

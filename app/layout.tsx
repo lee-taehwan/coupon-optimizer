@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://coupick.vercel.app"),
   title: "쿠폰 최적 적용 계산기",
   description: "쿠폰 최적화 웹",
   openGraph: {
