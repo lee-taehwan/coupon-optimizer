@@ -25,14 +25,14 @@ export const LayoutRenderer = ({ children }: { children: ReactNode }) => {
         <>
           <Script
             type="text/javascript"
-            src="//t1.daumcdn.net/kas/static/ba.min.js"
-            async
+            src="https://t1.kakaocdn.net/kas/static/ba.min.js"
+            strategy="afterInteractive"
           />
           <div className="w-full flex justify-center items-center py-4">
             <ins
               className="kakao_ad_area"
               style={{ display: "none" }}
-              data-ad-unit="DAN-D5PYicqSK3hSZsHW"
+              data-ad-unit="DAN-4gCXEAPjzYIBj0Fx"
               data-ad-width="300"
               data-ad-height="250"
             />
